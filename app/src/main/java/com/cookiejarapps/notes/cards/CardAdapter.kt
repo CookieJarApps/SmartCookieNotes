@@ -1,31 +1,56 @@
 package com.cookiejarapps.notes.cards
 
+import android.content.ClipData
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.cookiejarapps.notes.R
-import java.util.ArrayList
+import com.google.android.material.card.MaterialCardView
+import java.lang.ref.WeakReference
 
 /**
  * Provide a reference to the type of views that you are using
  * (custom ViewHolder).
  */
-class CardAdapter(private val dataSet: ArrayList<String>) :
+class CardAdapter(val items: ArrayList<String>, val listener: OnCardButtonClickListener):
     RecyclerView.Adapter<CardAdapter.ViewHolder>() {
 
     /**
      * Provide a reference to the type of views that you are using
      * (custom ViewHolder).
      */
-    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val textView: TextView
+    class ViewHolder(view: View, listener: OnCardButtonClickListener?) : RecyclerView.ViewHolder(view), View.OnClickListener {
+        val titleView: TextView
+        val contentView: TextView
+        val action_button_1: Button
+        val cardView: MaterialCardView
+        private var listenerRef: WeakReference<OnCardButtonClickListener>? = null
 
         init {
+            listenerRef = WeakReference(listener!!)
             // Define click listener for the ViewHolder's View.
-            textView = view.findViewById(R.id.card_title)
+            titleView = view.findViewById(R.id.card_title)
+            contentView = view.findViewById(R.id.card_subtitle)
+            action_button_1 = view.findViewById(R.id.action_button_1)
+            cardView = view.findViewById(R.id.card_view)
+            action_button_1.setOnClickListener(this)
+            cardView.setOnClickListener(this)
         }
+
+        override fun onClick(v: View?) {
+            if(v == action_button_1){
+                Toast.makeText(v?.getContext(), "BUTTON PRESSED", Toast.LENGTH_SHORT).show()
+            }
+            else{
+                Toast.makeText(v?.getContext(), "ROW PRESSED = " + getAdapterPosition(), Toast.LENGTH_SHORT).show()
+                listenerRef?.get()?.onPositionClicked(getAdapterPosition())
+            }
+        }
+
     }
 
     // Create new views (invoked by the layout manager)
@@ -34,18 +59,17 @@ class CardAdapter(private val dataSet: ArrayList<String>) :
         val view = LayoutInflater.from(viewGroup.context)
             .inflate(R.layout.note_card, viewGroup, false)
 
-        return ViewHolder(view)
+        return ViewHolder(view, listener)
     }
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
-        // Get element from your dataset at this position and replace the
-        // contents of the view with that element
-        viewHolder.textView.text = dataSet[position]
+        viewHolder.titleView.text = items[position]
+        viewHolder.contentView.text = items[position]
     }
 
     // Return the size of your dataset (invoked by the layout manager)
-    override fun getItemCount() = dataSet.size
+    override fun getItemCount() = items.size
 
 }
