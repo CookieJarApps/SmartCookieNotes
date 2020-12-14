@@ -2,4 +2,7 @@
     <string name="app_name">SmartCookieNotes</string>
     <string name="title">Title</string>
     <string name="content">Content</string>
+
+    <string name="share">Share</string>
+    <string name="change_color">Color</string>
 </resources>

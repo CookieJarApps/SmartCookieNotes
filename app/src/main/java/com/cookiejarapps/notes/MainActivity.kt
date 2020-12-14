@@ -14,8 +14,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cookiejarapps.notes.cards.CardAdapter
 import com.cookiejarapps.notes.cards.OnCardButtonClickListener
-import com.cookiejarapps.notes.cards.OnCardClickListener
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.util.*
 
 
@@ -39,6 +40,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         val listView =
             findViewById<View>(R.id.listView) as RecyclerView
         val sharedPreferences = applicationContext.getSharedPreferences(
@@ -46,12 +48,17 @@ class MainActivity : AppCompatActivity() {
             Context.MODE_PRIVATE
         )
         val set =
-            sharedPreferences.getStringSet("notes", null) as HashSet<String>?
+            sharedPreferences.getString("notes", null)
+
+        val gson = Gson()
+        val sType = object : TypeToken<List<Note>>() { }.type
+        val otherList = gson.fromJson<List<Note>>(set, sType)
+
         if (set == null) {
-            notes.add("Example Note")
+            notes.add(Note("Example", "Example note!", R.color.purple_200))
         } else {
             notes =
-                ArrayList(set)
+                ArrayList(otherList)
         }
 
         arrayAdapter = CardAdapter(notes, object: OnCardButtonClickListener {
@@ -78,11 +85,21 @@ class MainActivity : AppCompatActivity() {
                             )
                         val set =
                             HashSet(notes)
-                        sharedPreferences.edit().putStringSet("notes", set).apply()
+
+                        val gson = Gson()
+                        val jsonString = gson.toJson(set)
+
+                        sharedPreferences.edit().putString("notes", jsonString).apply()
                     }
                     .setNegativeButton("No", null)
                     .show()
                 true
+            }
+
+            override fun onButtonClicked(id: View, position: Int) {
+                when (id.getId()) {
+                    R.id.moreButton -> showBottomSheetDialogFragment(position)
+                }
             }
         })
         listView.adapter = arrayAdapter
@@ -122,8 +139,17 @@ class MainActivity : AppCompatActivity() {
         ItemTouchHelper(simpleItemTouchCallback)
     }
 
+    fun showBottomSheetDialogFragment(position: Int) {
+        val bottomSheetFragment = BottomSheetFragment()
+        val bundle = Bundle()
+        val myMessage = notes[position].title
+        bundle.putString("message", myMessage)
+        bottomSheetFragment.setArguments(bundle)
+        bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
+    }
+
     companion object {
-        var notes = ArrayList<String>()
+        var notes = ArrayList<Note>()
         var arrayAdapter: CardAdapter? = null
     }
 }

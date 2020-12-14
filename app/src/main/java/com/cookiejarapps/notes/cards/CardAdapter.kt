@@ -1,13 +1,15 @@
 package com.cookiejarapps.notes.cards
 
-import android.content.ClipData
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
+import com.cookiejarapps.notes.Note
 import com.cookiejarapps.notes.R
 import com.google.android.material.card.MaterialCardView
 import java.lang.ref.WeakReference
@@ -16,7 +18,7 @@ import java.lang.ref.WeakReference
  * Provide a reference to the type of views that you are using
  * (custom ViewHolder).
  */
-class CardAdapter(val items: ArrayList<String>, val listener: OnCardButtonClickListener):
+class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickListener):
     RecyclerView.Adapter<CardAdapter.ViewHolder>() {
 
     /**
@@ -26,7 +28,8 @@ class CardAdapter(val items: ArrayList<String>, val listener: OnCardButtonClickL
     class ViewHolder(view: View, listener: OnCardButtonClickListener?) : RecyclerView.ViewHolder(view), View.OnClickListener {
         val titleView: TextView
         val contentView: TextView
-        val action_button_1: Button
+        val imageButton: FrameLayout
+        val image: ImageView
         val cardView: MaterialCardView
         private var listenerRef: WeakReference<OnCardButtonClickListener>? = null
 
@@ -35,19 +38,19 @@ class CardAdapter(val items: ArrayList<String>, val listener: OnCardButtonClickL
             // Define click listener for the ViewHolder's View.
             titleView = view.findViewById(R.id.card_title)
             contentView = view.findViewById(R.id.card_subtitle)
-            action_button_1 = view.findViewById(R.id.action_button_1)
+            imageButton = view.findViewById(R.id.moreButton)
+            image = view.findViewById(R.id.imageButton)
             cardView = view.findViewById(R.id.card_view)
-            action_button_1.setOnClickListener(this)
             cardView.setOnClickListener(this)
+            imageButton.setOnClickListener(this)
         }
 
         override fun onClick(v: View?) {
-            if(v == action_button_1){
-                Toast.makeText(v?.getContext(), "BUTTON PRESSED", Toast.LENGTH_SHORT).show()
+            if(v?.id == R.id.card_view){
+                listenerRef?.get()?.onPositionClicked(adapterPosition)
             }
             else{
-                Toast.makeText(v?.getContext(), "ROW PRESSED = " + getAdapterPosition(), Toast.LENGTH_SHORT).show()
-                listenerRef?.get()?.onPositionClicked(getAdapterPosition())
+                listenerRef?.get()?.onButtonClicked(v!!, adapterPosition)
             }
         }
 
@@ -65,8 +68,18 @@ class CardAdapter(val items: ArrayList<String>, val listener: OnCardButtonClickL
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(viewHolder: ViewHolder, position: Int) {
 
-        viewHolder.titleView.text = items[position]
-        viewHolder.contentView.text = items[position]
+        viewHolder.titleView.text = items[position].title
+        viewHolder.contentView.text = items[position].content
+        //val color = items[position].colour or -0x1000000
+        val color = items[position].colour
+
+        if(ColorUtils.calculateLuminance(color) < 0.5) {
+            viewHolder.titleView.setTextColor(Color.WHITE)
+            viewHolder.contentView.setTextColor(Color.WHITE)
+            viewHolder.image.setColorFilter(Color.WHITE)
+        }
+
+        viewHolder.cardView.background.setTint(color)
     }
 
     // Return the size of your dataset (invoked by the layout manager)
