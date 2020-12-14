@@ -19,7 +19,8 @@
         android:textColor="@android:color/black"
         android:textSize="38sp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        android:inputType="text" />
 
     <EditText
         android:id="@+id/editText"
