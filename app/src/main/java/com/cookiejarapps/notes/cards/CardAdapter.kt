@@ -1,5 +1,6 @@
 package com.cookiejarapps.notes.cards
 
+import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,14 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
+import com.cookiejarapps.notes.MainActivity
 import com.cookiejarapps.notes.Note
 import com.cookiejarapps.notes.R
 import com.google.android.material.card.MaterialCardView
+import com.google.gson.Gson
 import java.lang.ref.WeakReference
+import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Provide a reference to the type of views that you are using
@@ -81,7 +86,6 @@ class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickLis
 
         viewHolder.cardView.background.setTint(color)
     }
-
     // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() = items.size
 

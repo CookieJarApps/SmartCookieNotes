@@ -5,11 +5,13 @@ import android.graphics.Color
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import com.cookiejarapps.notes.database.DatabaseHelper
 import com.google.gson.Gson
 import java.util.*
 
@@ -22,13 +24,20 @@ class NoteEditorActivity : AppCompatActivity() {
         setContentView(R.layout.activity_note)
         val editText = findViewById<View>(R.id.editTextTitle) as EditText
         val editTextContent = findViewById<View>(R.id.editText) as EditText
+
+        val database = DatabaseHelper(this)
+
         val intent = intent
+        Log.d("gesedgsdgs", noteID.toString())
         noteID = intent.getIntExtra("noteID", -1)
         if (noteID != -1) {
             editTextContent.setText(MainActivity.notes[noteID].content)
             editText.setText(MainActivity.notes[noteID].title)
         } else {
-            MainActivity.notes.add(Note("", "", getMatColor("500")))
+            noteID = MainActivity.notes.size
+            MainActivity.notes.add(Note(noteID, "", "", getMatColor("500")))
+            database.insertNote("", "", getMatColor("500"))
+
             noteID = MainActivity.notes.size - 1
             MainActivity.arrayAdapter!!.notifyDataSetChanged()
         }
@@ -48,7 +57,8 @@ class NoteEditorActivity : AppCompatActivity() {
                 count: Int
             ) {
                 MainActivity.notes[noteID].title = s.toString()
-                updatePrefs()
+                database.updateNote(noteID + 1, s.toString(), null, null)
+                MainActivity.arrayAdapter!!.notifyDataSetChanged()
             }
 
             override fun afterTextChanged(s: Editable) {}
@@ -69,7 +79,8 @@ class NoteEditorActivity : AppCompatActivity() {
                 count: Int
             ) {
                 MainActivity.notes[noteID].content = s.toString()
-                updatePrefs()
+                database.updateNote(noteID + 1, null, s.toString(), null)
+                MainActivity.arrayAdapter!!.notifyDataSetChanged()
             }
 
             override fun afterTextChanged(s: Editable) {}

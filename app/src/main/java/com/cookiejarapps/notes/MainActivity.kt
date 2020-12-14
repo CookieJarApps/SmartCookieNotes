@@ -2,7 +2,9 @@ package com.cookiejarapps.notes
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -14,10 +16,12 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cookiejarapps.notes.cards.CardAdapter
 import com.cookiejarapps.notes.cards.OnCardButtonClickListener
+import com.cookiejarapps.notes.database.DatabaseHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,24 +45,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val database = DatabaseHelper(this)
+
         val listView =
             findViewById<View>(R.id.listView) as RecyclerView
-        val sharedPreferences = applicationContext.getSharedPreferences(
-            "com.cookiejarapps.notes",
-            Context.MODE_PRIVATE
-        )
-        val set =
-            sharedPreferences.getString("notes", null)
 
-        val gson = Gson()
-        val sType = object : TypeToken<List<Note>>() { }.type
-        val otherList = gson.fromJson<List<Note>>(set, sType)
-
-        if (set == null) {
-            notes.add(Note("Example", "Example note!", R.color.purple_200))
+        if (database.numberOfRows() < 1) {
+            database.insertNote("Example", "Example note!", R.color.purple_200)
         } else {
             notes =
-                ArrayList(otherList)
+                ArrayList(database.allNotes)
         }
 
         arrayAdapter = CardAdapter(notes, object: OnCardButtonClickListener {
@@ -76,20 +72,8 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton(
                         "Yes"
                     ) { dialog, which ->
-                        notes.removeAt(position)
+                        database.deleteNote(position)
                         arrayAdapter!!.notifyDataSetChanged()
-                        val sharedPreferences =
-                            applicationContext.getSharedPreferences(
-                                "com.cookiejarapps.notes",
-                                Context.MODE_PRIVATE
-                            )
-                        val set =
-                            HashSet(notes)
-
-                        val gson = Gson()
-                        val jsonString = gson.toJson(set)
-
-                        sharedPreferences.edit().putString("notes", jsonString).apply()
                     }
                     .setNegativeButton("No", null)
                     .show()
@@ -127,8 +111,8 @@ class MainActivity : AppCompatActivity() {
                     val from = viewHolder.adapterPosition
                     val to = target.adapterPosition
 
-                    //adapter.moveItem(from, to)
                     adapter.notifyItemMoved(from, to)
+                    moveItem(from, to)
 
                     return true
                 }    override fun onSwiped(viewHolder: RecyclerView.ViewHolder,
@@ -137,6 +121,11 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         ItemTouchHelper(simpleItemTouchCallback)
+    }
+
+
+    fun moveItem(from: Int, to: Int) {
+
     }
 
     fun showBottomSheetDialogFragment(position: Int) {
