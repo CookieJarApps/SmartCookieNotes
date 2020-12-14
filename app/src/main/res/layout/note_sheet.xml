@@ -107,7 +107,6 @@
             android:layout_marginRight="8dp"
             android:layout_marginTop="30dp"
             android:layout_weight="1"
-            android:foreground="?attr/selectableItemBackground"
             android:text="DELETE" />
 
         <com.google.android.material.button.MaterialButton
@@ -119,7 +118,6 @@
             android:layout_marginTop="30dp"
             android:layout_marginRight="16dp"
             android:layout_weight="1"
-            android:foreground="?attr/selectableItemBackground"
             android:text="AR" />
     </LinearLayout>
 
