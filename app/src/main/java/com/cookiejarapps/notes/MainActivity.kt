@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
@@ -125,6 +126,17 @@ class MainActivity : AppCompatActivity() {
 
 
     fun moveItem(from: Int, to: Int) {
+        val oldTab = notes.toMutableList().get(from)
+        var oldTabList: MutableList<Note> = notes
+        oldTabList.removeAt(from)
+        oldTabList.add(to, oldTab)
+
+        DatabaseHelper(this).deleteAll()
+
+        for(i in oldTabList){
+            i.id = oldTabList.indexOf(i) + 1
+            DatabaseHelper(this).insertNote(i.title, i.content, i.colour)
+        }
 
     }
 

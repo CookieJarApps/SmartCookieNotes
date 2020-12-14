@@ -45,9 +45,17 @@ class DatabaseHelper(context: Context?) :
         return true
     }
 
-    fun getData(id: Int): Cursor {
+    fun getData(id: Int): Note {
         val db = this.readableDatabase
-        return db.rawQuery("select * from notes where id=$id", null)
+        val res = db.rawQuery("select * from notes where id=$id", null)
+        return Note(res.getInt(res.getColumnIndex(NOTES_COLUMN_ID)), res.getString(res.getColumnIndex(NOTES_COLUMN_TITLE)), res.getString(res.getColumnIndex(
+            NOTES_COLUMN_CONTENT)), res.getInt(res.getColumnIndex(NOTES_COLUMN_COLOR)))
+    }
+
+    fun deleteAll(): Boolean{
+        val db = this.readableDatabase
+        db.delete(NOTES_TABLE_NAME, null, null)
+        return true
     }
 
     fun numberOfRows(): Int {
