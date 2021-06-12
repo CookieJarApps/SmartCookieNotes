@@ -1,22 +1,19 @@
 package com.cookiejarapps.notes.cards
 
-import android.content.Context
 import android.graphics.Color
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
-import com.cookiejarapps.notes.MainActivity
 import com.cookiejarapps.notes.Note
 import com.cookiejarapps.notes.R
 import com.google.android.material.card.MaterialCardView
-import com.google.gson.Gson
 import java.lang.ref.WeakReference
-import java.util.*
 import kotlin.collections.ArrayList
 
 /**
@@ -33,8 +30,7 @@ class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickLis
     class ViewHolder(view: View, listener: OnCardButtonClickListener?) : RecyclerView.ViewHolder(view), View.OnClickListener {
         val titleView: TextView
         val contentView: TextView
-        val imageButton: FrameLayout
-        val image: ImageView
+        val imageButton: ImageButton
         val cardView: MaterialCardView
         private var listenerRef: WeakReference<OnCardButtonClickListener>? = null
 
@@ -44,7 +40,6 @@ class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickLis
             titleView = view.findViewById(R.id.card_title)
             contentView = view.findViewById(R.id.card_subtitle)
             imageButton = view.findViewById(R.id.moreButton)
-            image = view.findViewById(R.id.imageButton)
             cardView = view.findViewById(R.id.card_view)
             cardView.setOnClickListener(this)
             imageButton.setOnClickListener(this)
@@ -52,7 +47,7 @@ class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickLis
 
         override fun onClick(v: View?) {
             if(v?.id == R.id.card_view){
-                listenerRef?.get()?.onPositionClicked(adapterPosition)
+                listenerRef?.get()?.onPositionClicked(v, adapterPosition)
             }
             else{
                 listenerRef?.get()?.onButtonClicked(v!!, adapterPosition)
@@ -81,7 +76,7 @@ class CardAdapter(val items: ArrayList<Note>, val listener: OnCardButtonClickLis
         if(ColorUtils.calculateLuminance(color) < 0.5) {
             viewHolder.titleView.setTextColor(Color.WHITE)
             viewHolder.contentView.setTextColor(Color.WHITE)
-            viewHolder.image.setColorFilter(Color.WHITE)
+            viewHolder.imageButton.setColorFilter(Color.WHITE)
         }
 
         viewHolder.cardView.background.setTint(color)

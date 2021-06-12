@@ -1,8 +1,9 @@
-package com.cookiejarapps.notes
+package com.cookiejarapps.android.notes
 
 import android.content.Context
 import android.graphics.Color
 import android.os.Bundle
+import android.os.PersistableBundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
@@ -11,6 +12,7 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.EditText
 import androidx.appcompat.app.AppCompatActivity
+import com.cookiejarapps.notes.Note
 import com.cookiejarapps.notes.database.DatabaseHelper
 import com.google.gson.Gson
 import java.util.*
@@ -28,7 +30,7 @@ class NoteEditorActivity : AppCompatActivity() {
         val database = DatabaseHelper(this)
 
         val intent = intent
-        Log.d("gesedgsdgs", noteID.toString())
+
         noteID = intent.getIntExtra("noteID", -1)
         if (noteID != -1) {
             editTextContent.setText(MainActivity.notes[noteID].content)

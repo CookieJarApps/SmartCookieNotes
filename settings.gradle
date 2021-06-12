@@ -1,2 +1,4 @@
+include ':android'
+include ':wear'
 include ':app'
 rootProject.name = "SmartCookieNotes"

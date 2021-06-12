@@ -1,26 +1,26 @@
-package com.cookiejarapps.notes
+package com.cookiejarapps.android.notes
 
-import android.content.Context
+import android.app.ActivityOptions
 import android.content.Intent
-import android.graphics.Color
 import android.os.Bundle
-import android.provider.ContactsContract
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.view.Window
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.cookiejarapps.notes.BottomSheetFragment
+import com.cookiejarapps.notes.Note
+import com.cookiejarapps.notes.SheetButtonInterface
 import com.cookiejarapps.notes.cards.CardAdapter
 import com.cookiejarapps.notes.cards.OnCardButtonClickListener
 import com.cookiejarapps.notes.database.DatabaseHelper
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -32,11 +32,12 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         super.onOptionsItemSelected(item)
         if (item.itemId == R.id.add_note) {
             val intent = Intent(applicationContext, NoteEditorActivity::class.java)
-            startActivity(intent)
+            startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this).toBundle())
             return true
         }
         return false
@@ -44,6 +45,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        setExitSharedElementCallback(MaterialContainerTransformSharedElementCallback())
+        window.sharedElementsUseOverlay = false
+
         setContentView(R.layout.activity_main)
 
         val database = DatabaseHelper(this)
@@ -59,25 +65,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         arrayAdapter = CardAdapter(notes, object: OnCardButtonClickListener {
-             override fun onPositionClicked(position: Int) {
-                 val intent = Intent(applicationContext, NoteEditorActivity::class.java)
-                 intent.putExtra("noteID", position)
-                 startActivity(intent)
+            override fun onPositionClicked(id: View, position: Int) {
+                val intent = Intent(applicationContext, NoteEditorActivity::class.java)
+                intent.putExtra("noteID", position)
+                startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this@MainActivity).toBundle())
             }
 
             override fun onLongClicked(position: Int) {
-                MaterialAlertDialogBuilder(this@MainActivity)
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .setTitle("Delete?")
-                    .setMessage("Are you sure you want to delete this note?")
-                    .setPositiveButton(
-                        "Yes"
-                    ) { dialog, which ->
-                        database.deleteNote(position)
-                        arrayAdapter!!.notifyDataSetChanged()
-                    }
-                    .setNegativeButton("No", null)
-                    .show()
                 true
             }
 
@@ -141,10 +135,38 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun showBottomSheetDialogFragment(position: Int) {
-        val bottomSheetFragment = BottomSheetFragment()
+        val bottomSheetFragment = BottomSheetFragment(object: SheetButtonInterface {
+            override fun buttonClicked(v: View?) {
+                MaterialAlertDialogBuilder(this@MainActivity)
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .setTitle("Delete?")
+                    .setMessage("Are you sure you want to delete this note?")
+                    .setPositiveButton(
+                        "Yes"
+                    ) { dialog, which ->
+                        DatabaseHelper(this@MainActivity).deleteNote(position)
+                        notes.removeAt(position)
+
+                        DatabaseHelper(this@MainActivity).deleteAll()
+
+                        for(i in notes){89
+                            i.id = notes.indexOf(i) + 1
+                            DatabaseHelper(this@MainActivity).insertNote(i.title, i.content, i.colour)
+                        }
+
+                        arrayAdapter?.notifyDataSetChanged()
+                        //activity.updateNotes()
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+
+        })
         val bundle = Bundle()
-        val myMessage = notes[position].title
-        bundle.putString("message", myMessage)
+        val title = notes[position].title
+        bundle.putString("title", title)
+        val id = notes[position].id
+        bundle.putInt("id", id)
         bottomSheetFragment.setArguments(bundle)
         bottomSheetFragment.show(supportFragmentManager, bottomSheetFragment.tag)
     }

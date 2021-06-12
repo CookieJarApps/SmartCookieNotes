@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".NoteEditorActivity">
+    tools:context="com.cookiejarapps.android.notes.NoteEditorActivity"
+    android:id="@+id/noteEditor">
 
     <EditText
         android:id="@+id/editTextTitle"
@@ -20,7 +21,8 @@
         android:textSize="38sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        android:inputType="text" />
+        android:inputType="text"
+        android:transitionName="title"/>
 
     <EditText
         android:id="@+id/editText"
@@ -36,7 +38,8 @@
         android:textColor="@android:color/black"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextTitle" />
+        app:layout_constraintTop_toBottomOf="@+id/editTextTitle"
+        android:transitionName="content" />
 
     <androidx.constraintlayout.widget.Guideline
         android:id="@+id/guideline"
